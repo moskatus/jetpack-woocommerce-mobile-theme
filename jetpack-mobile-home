@@ -22,7 +22,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		/**
 		 * Localisation
 		 **/
-		load_plugin_textdomain( 'wc_mobile', false, dirname( plugin_basename( __FILE__ ) ) . '/' );
+		
+		load_plugin_textdomain( 'jetpack-mobile-home', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		class WC_Mobile {
 			public function __construct() {
@@ -61,22 +62,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 }
 }
 			}
-    
-public function jetpackme_maybe_add_filter() {
- 
-    // On mobile, and on the home page?
-        if ( jetpackme_is_mobile() && is_front_page() ) {
-
-			return do_shortcode('[recent_products]');
-                        }
-		}
+   
                 
                        function storefront_recent_products( $args ) {
 		if ( is_woocommerce_activated() ) {
+                     if ( jetpackme_is_mobile() && is_front_page() ) {
 			$args = apply_filters( 'storefront_recent_products_args', array(
 				'limit' 			=> 10,
 				'columns' 			=> 1,
-				'title'				=> __( 'Recent Products', 'storefront' ),
+				'title'				=> __( 'Recent Products', 'jetpack-mobile-home' ),
 				) );
 			$arg = '<section class="storefront-product-section storefront-recent-products">';
 			do_action( 'storefront_homepage_before_recent_products' );
@@ -85,7 +79,7 @@ public function jetpackme_maybe_add_filter() {
 			do_action( 'storefront_homepage_after_recent_products' );
 			$arg .= '</section>';
                         return $arg;
-		}
+                }}
 	}         
         function storefront_homepage_content() {
 		while ( have_posts() ) : the_post();
