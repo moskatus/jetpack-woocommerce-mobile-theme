@@ -1,0 +1,111 @@
+<?php
+/*
+Plugin Name: jetpack Mobile Home
+Plugin URI: http://www.moskatus.com/
+Description: jetpack Mobile Home Page Recent Products Woocommerce
+Author: Moskatus
+Author URI: http://www.moskatus.com
+Version: 1.0.0
+
+	Copyright: © 2012 Acme Corp (email : developer@acme.com)
+	License: GNU General Public License v3.0
+	License URI: http://www.gnu.org/licenses/gpl-3.0.html
+*/
+
+/**
+ * Check if WooCommerce is active
+ */
+if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+	
+	if ( ! class_exists( 'WC_Mobile' ) ) {
+		
+		/**
+		 * Localisation
+		 **/
+		load_plugin_textdomain( 'wc_mobile', false, dirname( plugin_basename( __FILE__ ) ) . '/' );
+
+		class WC_Mobile {
+			public function __construct() {
+				// called only after woocommerce has finished loading
+				
+				// called after all plugins have loaded
+				add_action( 'plugins_loaded', array( &$this, 'plugins_loaded' ) );
+				
+				// called just before the woocommerce template functions are included
+			
+                                add_action( 'the_content', array( &$this,'storefront_recent_products'),		40 );
+                              
+				// take care of anything else that needs to be done immediately upon plugin instantiation, here in the constructor
+			}
+			
+			/**
+			 * Take care of anything that needs all plugins to be loaded
+			 */
+			public function plugins_loaded() {
+				if ( ! function_exists( 'is_woocommerce_activated' ) ) {
+	function is_woocommerce_activated() {
+		if ( class_exists( 'woocommerce' ) ) { return true; } else { return false; }
+                
+	}
+        function jetpackme_is_mobile() {
+ 
+    // Are Jetpack Mobile functions available?
+    if ( ! function_exists( 'jetpack_is_mobile' ) )
+        return false;
+ 
+    // Is Mobile theme showing?
+    if ( isset( $_COOKIE['akm_mobile'] ) && $_COOKIE['akm_mobile'] == 'false' )
+        return false;
+ 
+    return jetpack_is_mobile();
+}
+}
+			}
+    
+public function jetpackme_maybe_add_filter() {
+ 
+    // On mobile, and on the home page?
+        if ( jetpackme_is_mobile() && is_front_page() ) {
+
+			return do_shortcode('[recent_products]');
+                        }
+		}
+                
+                       function storefront_recent_products( $args ) {
+		if ( is_woocommerce_activated() ) {
+			$args = apply_filters( 'storefront_recent_products_args', array(
+				'limit' 			=> 10,
+				'columns' 			=> 1,
+				'title'				=> __( 'Recent Products', 'storefront' ),
+				) );
+			$arg = '<section class="storefront-product-section storefront-recent-products">';
+			do_action( 'storefront_homepage_before_recent_products' );
+			$arg .= '<h2 class="section-title">' . esc_attr( $args['title'] ) . '</h2>';
+			$arg .= do_shortcode( '[recent_products per_page="' . intval( $args['limit'] ) . '" columns="' . intval( $args['columns'] ) . '"]' );
+			do_action( 'storefront_homepage_after_recent_products' );
+			$arg .= '</section>';
+                        return $arg;
+		}
+	}         
+        function storefront_homepage_content() {
+		while ( have_posts() ) : the_post();
+			?>
+
+<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+	<?php	
+	do_action( 'storefront_page' );
+	?>
+</article><!-- #post-## -->
+<?php
+		endwhile; // end of the loop.
+	}
+			/**
+			 * Override any of the template functions from woocommerce/woocommerce-template.php 
+			 * with our own template functions file
+			 */
+                            }
+
+		// finally instantiate our plugin class and add it to the set of globals
+		$GLOBALS['wc_mobile'] = new WC_Mobile();
+	}
+}
