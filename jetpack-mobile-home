@@ -28,13 +28,24 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		class WC_Mobile {
 			public function __construct() {
 				// called only after woocommerce has finished loading
-				
+				 function jetpackme_is_mobile() {
+ 
+    // Are Jetpack Mobile functions available?
+    if ( ! function_exists( 'jetpack_is_mobile' ) )
+        return false;
+ 
+    // Is Mobile theme showing?
+    if ( isset( $_COOKIE['akm_mobile'] ) && $_COOKIE['akm_mobile'] == 'false' )
+        return false;
+ 
+    return jetpack_is_mobile();
+}
 				// called after all plugins have loaded
 				add_action( 'plugins_loaded', array( &$this, 'plugins_loaded' ) );
 				
 				// called just before the woocommerce template functions are included
 			
-                                add_action( 'the_content', array( &$this,'storefront_recent_products'),		40 );
+                                add_action( 'wp_head', array( &$this,'storefront_homepage_content'),		40 );
                               
 				// take care of anything else that needs to be done immediately upon plugin instantiation, here in the constructor
 			}
@@ -48,25 +59,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		if ( class_exists( 'woocommerce' ) ) { return true; } else { return false; }
                 
 	}
-        function jetpackme_is_mobile() {
- 
-    // Are Jetpack Mobile functions available?
-    if ( ! function_exists( 'jetpack_is_mobile' ) )
-        return false;
- 
-    // Is Mobile theme showing?
-    if ( isset( $_COOKIE['akm_mobile'] ) && $_COOKIE['akm_mobile'] == 'false' )
-        return false;
- 
-    return jetpack_is_mobile();
-}
+       
 }
 			}
    
                 
                        function storefront_recent_products( $args ) {
-		if ( is_woocommerce_activated() ) {
+		
                      if ( jetpackme_is_mobile() && is_front_page() ) {
+                         if ( is_woocommerce_activated() ) {
 			$args = apply_filters( 'storefront_recent_products_args', array(
 				'limit' 			=> 10,
 				'columns' 			=> 1,
@@ -82,17 +83,15 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                 }}
 	}         
         function storefront_homepage_content() {
+            if ( jetpackme_is_mobile() && is_front_page() ) {
 		while ( have_posts() ) : the_post();
 			?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<?php	
-	do_action( 'storefront_page' );
-	?>
-</article><!-- #post-## -->
+
 <?php
 		endwhile; // end of the loop.
-	}
+                add_action( 'the_content', array( &$this,'storefront_recent_products'),		40 );
+        }}
 			/**
 			 * Override any of the template functions from woocommerce/woocommerce-template.php 
 			 * with our own template functions file
